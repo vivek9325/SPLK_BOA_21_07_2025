@@ -1,0 +1,145 @@
+Pre test URL ---> https://forms.office.com/r/bCU07PwiTE
+
+
+Git Hub ---> https://github.com/vivek9325/SPLK_BOA_21_07_2025.git
+
+
+
+Commands ----
+
+index=_internal
+
+index=main sourcetype=csv source=Sample_tickets.csv 
+| table ticket_number, severity, current_ticket_state
+
+index=main sourcetype=csv source=Sample_tickets.csv 
+| stats count as total by severity, current_ticket_state
+
+index=_internal | stats list(source) as source by sourcetype
+
+index=_internal | stats values(source) as source by sourcetype
+
+
+index=_internal sourcetype=splunkd_ui_access 
+| table bytes 
+| eval kb = round(bytes/1024,2)." KB"
+
+
+index=main 
+| stats count by severity 
+| eval status = if(severity<3,"High","Low") 
+| fields - count
+
+index=main 
+| stats count by severity 
+| fields - count 
+| eval status = case(severity=1,"Critical", severity=2, "Normal",1=1, "Low")
+
+index=main 
+| stats count by severity 
+| fields - count 
+| eval status = case(severity=1,"Critical", severity=2, "Normal",1=1, "Low")| sort - severity
+
+
+index=main 
+| stats count by current_ticket_state 
+| addcoltotals label=total labelfield=current_ticket_state
+
+
+index=main 
+| chart count by current_ticket_state, asset_id 
+| addcoltotals label=total labelfield=current_ticket_state 
+| addtotals fieldname=sum
+
+
+index=_internal 
+| top sourcetype limit=0
+
+
+index=_internal 
+| top sourcetype
+
+
+index=_internal 
+| top sourcetype limit=3
+
+
+index=_internal 
+| rare sourcetype limit=0
+
+index=_internal 
+| rare sourcetype
+
+index=_internal 
+| rare sourcetype limit=3
+
+
+
+index=main 
+| stats count by current_ticket_state 
+| eval threshold=250 
+| search count>200 
+| where count > threshold
+
+
+index=main 
+| stats count by current_ticket_state 
+| eval threshold=250 
+| search current_ticket_state!="Resolved"
+
+
+|eventcount index=* OR index=_* summarize=false
+
+| eventcount index=* OR index=_* summarize=false 
+| fields - provider
+
+
+index=main 
+| chart count by current_ticket_state
+
+
+index=main 
+| timechart span=1y count by current_ticket_state
+
+
+index=main 
+| table time_submitted , closed_date 
+| eval epoc_time_submitted = strptime(time_submitted,"%d-%m-%y %H:%M"), epoc_closed_date = strptime(closed_date, "%d-%m-%y %H:%M")
+
+
+index=main 
+| table time_submitted , closed_date 
+| eval epoc_time_submitted = strptime(time_submitted,"%d-%m-%y %H:%M"), epoc_closed_date = strptime(closed_date, "%d-%m-%y %H:%M") 
+| eval diff = epoc_closed_date - epoc_time_submitted 
+| eval time_format = strftime(diff,"%H:%M")
+
+
+index=main 
+| table time_submitted , closed_date 
+| eval epoc_time_submitted = strptime(time_submitted,"%d-%m-%y %H:%M"), epoc_closed_date = strptime(closed_date, "%d-%m-%y %H:%M") 
+| eval diff = epoc_closed_date - epoc_time_submitted 
+| eval time_format = strftime(diff,"%d")." days"
+
+
+https://regex101.com/
+https://www.debuggex.com/cheatsheet/regex/pcre
+
+
+index="vk_idx" sourcetype="vk_txt" 
+| rex field=_raw "From:\s+<(?P<from_email_id>.*)>\s+To" 
+| table _raw, from_email_id
+
+
+|makeresults | eval text="Vk;search;saved_search"
+
+
+|makeresults | eval text="Vk;search;saved_search" | rex field=text "(?P<username>.*);(?P<app_name>.*);(?P<savedsearch_name>.*)"
+
+
+source="tutorialdata.zip:*" host="ip-172-31-83-128" index="vk_idx" | transaction JSESSIONID, clientip startswith=view endswith=purchase
+
+
+source="tutorialdata.zip:*" host="ip-172-31-83-128" index="vk_idx" 
+| transaction JSESSIONID, clientip startswith=view endswith=purchase maxevents=3 maxpause=2s maxspan=5s
+
+
