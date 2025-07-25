@@ -1,5 +1,22 @@
 <form version="1.1" theme="dark">
   <label>vk_classic_dashboard</label>
+  
+  <search id="base_search1">
+    
+    <query>
+      
+      index=main source=Sample_tickets.csv | stats count by severity, current_ticket_state, asset_id
+      
+    </query>
+    
+    <earliest>0</earliest>
+    <latest>now</latest>
+    
+  </search>
+  
+  
+  <search id="saved_search" ref="vk_savedsearch"></search>
+  
   <fieldset submitButton="true" autoRun="false">
     <input type="time" token="time_filter" searchWhenChanged="false">
       <label>Time</label>
@@ -8,19 +25,23 @@
         <latest>now</latest>
       </default>
     </input>
+    
+    
     <input type="dropdown" token="state" searchWhenChanged="false">
       <label>ticket state</label>
       <fieldForLabel>current_ticket_state</fieldForLabel>
       <fieldForValue>current_ticket_state</fieldForValue>
-      <search>
-        <query>index=main source=Sample_tickets.csv | stats count by current_ticket_state</query>
-        <earliest>0</earliest>
-        <latest></latest>
+      
+      <search base="base_search1">
+        <query> | stats count by current_ticket_state</query>
       </search>
+      
       <choice value="*">All</choice>
       <default>*</default>
       <initialValue>*</initialValue>
     </input>
+    
+    
     <input type="multiselect" token="asset_id" searchWhenChanged="false">
       <label>asset id</label>
       <valuePrefix>asset_id="</valuePrefix>
@@ -38,7 +59,7 @@
   </fieldset>
   <row>
     <panel>
-      <title>count by severity</title>
+      <title>count by severity - $tok1$</title>
       <chart>
         <search>
           <query>index=main source="sample_tickets.csv" current_ticket_state="$state$" $asset_id$| stats count by severity</query>
@@ -67,7 +88,7 @@
         <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
         <option name="charting.chart.stackMode">default</option>
         <option name="charting.chart.style">shiny</option>
-        <option name="charting.drilldown">none</option>
+        <option name="charting.drilldown">all</option>
         <option name="charting.layout.splitSeries">0</option>
         <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
@@ -78,17 +99,20 @@
         <option name="trellis.enabled">0</option>
         <option name="trellis.scales.shared">1</option>
         <option name="trellis.size">medium</option>
+        <drilldown>
+          <set token="tok1">$click.value$</set>
+        </drilldown>
       </chart>
     </panel>
     <panel>
       <title>count by ticket state</title>
       <chart>
-        <search>
-          <query>index=main source="sample_tickets.csv" | stats count by current_ticket_state</query>
-          <earliest>$time_filter.earliest$</earliest>
-          <latest>$time_filter.latest$</latest>
-          <sampleRatio>1</sampleRatio>
+       
+        <search base="saved_search">
+          <query> | stats count by current_ticket_state</query>
         </search>
+        
+        
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
