@@ -1,0 +1,173 @@
+{
+    "title": "vk_studio_dashboard",
+    "description": "",
+    "inputs": {
+        "input_TBZRDPDX": {
+            "context": {
+                "formattedConfig": {
+                    "number": {
+                        "prefix": ""
+                    }
+                },
+                "formattedStatics": ">statics | formatByType(formattedConfig)",
+                "label": ">primary | seriesByName(\"current_ticket_state\") | renameSeries(\"label\") | formatByType(formattedConfig)",
+                "statics": [
+                    [
+                        "All"
+                    ],
+                    [
+                        "*"
+                    ]
+                ],
+                "value": ">primary | seriesByName(\"current_ticket_state\") | renameSeries(\"value\") | formatByType(formattedConfig)"
+            },
+            "dataSources": {
+                "primary": "ds_SVlwCSnB"
+            },
+            "options": {
+                "defaultValue": "*",
+                "items": ">frame(label, value) | prepend(formattedStatics) | objects()",
+                "token": "ticket_state"
+            },
+            "title": "Ticket State",
+            "type": "input.dropdown"
+        },
+        "input_global_trp": {
+            "options": {
+                "defaultValue": "-24h@h,now",
+                "token": "global_time"
+            },
+            "title": "Global Time Range",
+            "type": "input.timerange"
+        }
+    },
+    "defaults": {
+        "dataSources": {
+            "ds.search": {
+                "options": {
+                    "queryParameters": {
+                        "earliest": "$global_time.earliest$",
+                        "latest": "$global_time.latest$"
+                    }
+                }
+            }
+        }
+    },
+    "visualizations": {
+        "viz_CHybiSn5": {
+            "dataSources": {
+                "primary": "ds_mdSPB7Py"
+            },
+            "description": "This panel has details on the basis of severity wise",
+            "options": {
+                "backgroundColor": "#ec9960",
+                "legendDisplay": "top",
+                "seriesColors": [
+                    "#ffffff",
+                    "#009CEB",
+                    "#00CDAF",
+                    "#DD9900",
+                    "#FF677B",
+                    "#CB2196",
+                    "#813193",
+                    "#0051B5",
+                    "#008C80",
+                    "#99B100",
+                    "#FFA476",
+                    "#FF6ACE",
+                    "#AE8CFF",
+                    "#00689D",
+                    "#00490A",
+                    "#465D00",
+                    "#9D6300",
+                    "#F6540B",
+                    "#FF969E",
+                    "#E47BFE"
+                ]
+            },
+            "title": "Count by severity",
+            "type": "splunk.column"
+        }
+    },
+    "dataSources": {
+        "ds_59wy5S5V": {
+            "name": "base_search1",
+            "options": {
+                "query": "index=main source=Sample_tickets.csv \n|  stats count by severity, current_ticket_state",
+                "queryParameters": {
+                    "earliest": "0",
+                    "latest": ""
+                }
+            },
+            "type": "ds.search"
+        },
+        "ds_BkTORE8h": {
+            "name": "vk_savedsearch",
+            "options": {
+                "app": "search",
+                "ref": "vk_savedsearch"
+            },
+            "type": "ds.savedSearch"
+        },
+        "ds_SVlwCSnB": {
+            "name": "ticket_state",
+            "options": {
+                "extend": "ds_BkTORE8h",
+                "query": "| stats count by current_ticket_state"
+            },
+            "type": "ds.chain"
+        },
+        "ds_mdSPB7Py": {
+            "name": "vk_severity",
+            "options": {
+                "extend": "ds_59wy5S5V",
+                "query": "| search current_ticket_state=\"$ticket_state$\"| stats count by severity"
+            },
+            "type": "ds.chain"
+        }
+    },
+    "layout": {
+        "globalInputs": [
+            "input_global_trp",
+            "input_TBZRDPDX"
+        ],
+        "layoutDefinitions": {
+            "layout_1": {
+                "options": {
+                    "backgroundColor": "#dc4e41",
+                    "backgroundImage": {
+                        "sizeType": "contain",
+                        "src": "splunk-enterprise-kvstore://688354316b90dd61e903c800",
+                        "x": 0,
+                        "y": 0
+                    },
+                    "display": "auto",
+                    "height": 960,
+                    "width": 1440
+                },
+                "structure": [
+                    {
+                        "item": "viz_CHybiSn5",
+                        "position": {
+                            "h": 370,
+                            "w": 750,
+                            "x": 0,
+                            "y": 0
+                        },
+                        "type": "block"
+                    }
+                ],
+                "type": "absolute"
+            }
+        },
+        "options": {},
+        "tabs": {
+            "items": [
+                {
+                    "label": "New tab",
+                    "layoutId": "layout_1"
+                }
+            ]
+        }
+    }
+}
